@@ -4,7 +4,7 @@ import "dotenv/config";
 const METADATA_CID = process.env.METADATA_CID;
 
 const main = async () => {
-  const metadataURL = METADATA_CID;
+  const metadataURL = `ipfs://${METADATA_CID}`;
   const lw3PunksContract = await ethers.getContractFactory("LW3Punks");
   const deployedLW3PunksContract = await lw3PunksContract.deploy(metadataURL!);
 

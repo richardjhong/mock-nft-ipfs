@@ -7,11 +7,22 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract LW3Punks is ERC721Enumerable, Ownable {
   using Strings for uint256;
-
+  /**
+   * @dev _baseTokenURI for computing {tokenURI}. If set, the resulting URI for each
+   * token will be the concatenation of the `baseURI` and the `tokenId`.
+   */
   string _baseTokenURI;
+
+  //  _price is the price of one LW3Punks NFT
   uint256 public _price = 0.01 ether;
+
+  // _paused is used to pause the contract in case of an emergency
   bool public _paused;
+
+  // max number of LW3Punks
   uint256 public maxTokenIds = 10;
+
+  // total number of tokenIds minted
   uint256 public tokenIds;
 
   modifier onlyWhenNotPaused() {
@@ -19,31 +30,36 @@ contract LW3Punks is ERC721Enumerable, Ownable {
     _;
   }
 
+  /**
+   * @dev ERC721 constructor takes in a `name` and a `symbol` to the token collection.
+   * name in our case is `LW3Punks` and symbol is `LW3P`.
+   * Constructor for LW3P takes in the baseURI to set _baseTokenURI for the collection.
+   */
   constructor(string memory baseURI) ERC721("LW3Punks", "LW3P") {
     _baseTokenURI = baseURI;
   }
 
   /**
-   * @dev mint allows a user to mint 1 NFT per transaction
+   * @dev mint allows an user to mint 1 NFT per transaction.
    */
   function mint() public payable onlyWhenNotPaused {
-    require(tokenIds < maxTokenIds, "Exceeded maximum LW3Punks supply");
+    require(tokenIds < maxTokenIds, "Exceed maximum LW3Punks supply");
     require(msg.value >= _price, "Ether sent is not correct");
-    tokenIds++;
+    tokenIds += 1;
     _safeMint(msg.sender, tokenIds);
   }
 
   /**
-   * @dev _baseURI overrides the OpenZeppelin's ERC721 implementation which by default returns an empty string
-   *      baseURI
+   * @dev _baseURI overrides the Openzeppelin's ERC721 implementation which by default
+   * returned an empty string for the baseURI
    */
   function _baseURI() internal view virtual override returns (string memory) {
     return _baseTokenURI;
   }
 
   /**
-   * @dev tokenURI overrides the OopenZeppelin's ERC721 implementation for tokenURI funciton
-   * This function returns the URI from where metadata is extracted for a given tokenId
+   * @dev tokenURI overrides the Openzeppelin's ERC721 implementation for tokenURI function
+   * This function returns the URI from where we can extract the metadata for a given tokenId
    */
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
     require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
@@ -67,7 +83,8 @@ contract LW3Punks is ERC721Enumerable, Ownable {
   }
 
   /**
-   * @dev withdraw sends all the ether in the contract to the owner of the contract
+   * @dev withdraw sends all the ether in the contract
+   * to the owner of the contract
    */
   function withdraw() public onlyOwner {
     address _owner = owner();
@@ -76,7 +93,9 @@ contract LW3Punks is ERC721Enumerable, Ownable {
     require(sent, "Failed to send Ether");
   }
 
+  // Function to receive Ether. msg.data must be empty
   receive() external payable {}
 
+  // Fallback function is called when msg.data is not empty
   fallback() external payable {}
 }
